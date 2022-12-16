@@ -1,0 +1,12 @@
+apiVersion: cache.fargate-injector.eks/v1alpha1
+kind: FargateSidecarConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: fargatesidecarconfig
+    app.kubernetes.io/instance: fargatesidecarconfig-sample
+    app.kubernetes.io/part-of: fargate-sidecar-injector
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: fargate-sidecar-injector
+  name: fargatesidecarconfig-sample
+spec:
+  # TODO(user): Add fields here

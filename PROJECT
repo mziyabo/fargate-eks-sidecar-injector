@@ -1,0 +1,19 @@
+domain: fargate-injector.eks
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: fargate-sidecar-injector
+repo: github.com/mziyabo/fargate-sidecar-injector
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: fargate-injector.eks
+  group: cache
+  kind: FargateSidecarConfig
+  path: github.com/mziyabo/fargate-sidecar-injector/api/v1alpha1
+  version: v1alpha1
+version: "3"
