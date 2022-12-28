@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fargate-sidecar-injector.fullname" . }}
+  labels:
+    {{- include "fargate-sidecar-injector.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: {{ .Values.service.port }}
+  selector:
+    {{- include "fargate-sidecar-injector.selectorLabels" . | nindent 4 }}
