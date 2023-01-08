@@ -13,7 +13,7 @@ FROM alpine:latest
 
 WORKDIR /usr/src/fargate-sidecar-injector
 
-COPY --from=builder /usr/src/proxy/fargate-sidecar-injector ./
+COPY --from=builder /usr/src/fargate-sidecar-injector/fargate-sidecar-injector ./
 
 EXPOSE 3003
 

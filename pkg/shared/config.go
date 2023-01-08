@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"encoding/base64"
+
 	"github.com/spf13/viper"
 )
 
@@ -16,10 +18,19 @@ func init() {
 
 // Initialize webhook config
 func NewConfig() FargateSidecarInjectorConfig {
-	// TODO: Implement
+	// TODO: Clean this up - Lots of experimentation and repetition here
+	cert, _ := base64.StdEncoding.DecodeString(viper.GetString("serve.tls.cert"))
+	key, _ := base64.StdEncoding.DecodeString(viper.GetString("serve.tls.certKey"))
+
 	config := FargateSidecarInjectorConfig{
 		Port: viper.GetInt("serve.port"),
 		Host: viper.GetString("serve.host"),
+
+		TLSConfig: TLSClientConfig{
+			Enabled: viper.GetBool("serve.tls.enabled"),
+			Cert:    string(cert),
+			Key:     string(key),
+		},
 	}
 
 	return config
@@ -42,12 +53,10 @@ type TLSClientConfig struct {
 
 // Parse webhook server configuration
 func parseConfig() {
-
 	// Name of config file (without extension)
 	viper.SetConfigName("fargatesidecarinjector.conf")
-
 	// REQUIRED if the config file does not have the extension in the name
-	viper.SetConfigType("json")
+	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/etc/fargatesidecarinjector")
 	viper.AddConfigPath("$HOME/.fargatesidecarinjector")
 	viper.AddConfigPath(".")

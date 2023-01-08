@@ -1,4 +1,8 @@
-{{ $cert := lookup "v1" "ConfigMap" "default" (include "fargate-sidecar-injector.fullname" .) }} 
+{{- $tls := dict -}}
+{{ $cert := lookup "v1" "ConfigMap" "default" (include "fargate-sidecar-injector.fullname" .) }}
+{{- if and $cert $cert.data }}
+{{- $_ := set $tls "ca.crt" (index $cert.data "ca.crt") }}
+{{- end }}
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -19,7 +23,9 @@ webhooks:
         namespace: default
         name: {{ include "fargate-sidecar-injector.fullname" . }}
         path: /mutate
-      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURjVENDQWxtZ0F3SUJBZ0lVSjlIYzBGS210VHJRWHhOaE5sQzhKQy9VbTNNd0RRWUpLb1pJaHZjTkFRRUwKQlFBd2dZb3hDekFKQmdOVkJBWVRBbHBCTVJrd0Z3WURWUVFJRXhCWFpYTjBaWEp1SUZCeWIzWnBibU5sTVJJdwpFQVlEVlFRSEV3bERZWEJsSUZSdmQyNHhFekFSQmdOVkJBb1RDbTF5WkdWc2FYWmxjbmt4RkRBU0JnTlZCQXNUCkMwVnVaMmx1WldWeWFXNW5NU0V3SHdZRFZRUURFeGhtYjI5a0xXbHRZV2RsTFd4aFltVnNMWGRsWW1odmIyc3cKSGhjTk1qSXdOakl6TVRneU1qQXdXaGNOTWpNd05qSXpNVGd5TWpBd1dqQWpNU0V3SHdZRFZRUURFeGhtYjI5awpMV2x0WVdkbExXeGhZbVZzTFhkbFltaHZiMnN3V1RBVEJnY3Foa2pPUFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVNaCkxBMUZibGlmblhtTVFYWFBPZTA4cW82dWZJQTVhOU9KdHVIZmRXdDVHZWJjQmZJSWJIanc3cldqaDIwOUticEkKK09pYWFNWW1lSThPUnd3SVJ5MjlvNEgvTUlIOE1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVQpCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUhBd0l3REFZRFZSMFRBUUgvQkFJd0FEQWRCZ05WSFE0RUZnUVVVSzZlClBKSUk4ZEVvMHBiSHZJb2UvRFlRMzVjd0h3WURWUjBqQkJnd0ZvQVVMTmJxVUR0bG9DM08vbjREdkFNbVpjZ0IKMU1rd2ZRWURWUjBSQkhZd2RJSVlabTl2WkMxcGJXRm5aUzFzWVdKbGJDMTNaV0pvYjI5cmdpUm1iMjlrTFdsdApZV2RsTFd4aFltVnNMWGRsWW1odmIyc3VaR1ZtWVhWc2RDNXpkbU9DTW1admIyUXRhVzFoWjJVdGJHRmlaV3d0CmQyVmlhRzl2YXk1a1pXWmhkV3gwTG5OMll5NWpiSFZ6ZEdWeUxteHZZMkZzTUEwR0NTcUdTSWIzRFFFQkN3VUEKQTRJQkFRQVkybkE2eU5LeGUxYWt4eWVIdXdIQm9ibDJlZU5BbEV5d0RXVHZLSktFdzNpQ2hPOVJXMmxXZloxSQovNGx5UEJNWUN2SUJ5ZVNOYStKRXpLbjBpdUZVbDJCV0w0TzhYQmFsQkRoTGk2T0hMeHZwOW56VFU3UDZEaU81CmpkU09tZTduVmdIaXlmanpRNUZFNjlGRStKOW5sNWkxWUlIRWlUcnZieGlMRUZ2SGRJeVZIRCszQVN3MTRrZmgKN3VRRnIrUFRONC91ZDZteFdwSk5WaFJRMU11VG5HUVl6M0EyV3c5Z1NGT1k0ekxyT2labzlBdVB1TXRpQmJUVQp4VTdxY2MzRU9BZ0c2bGIxRTlPYnpqZEJrREFmaEtwSmFuVVVNUzdNOFMrUkdjV3QzTUc4SjZLNDB5bEtENGFWCmthRW9GVVlxYzlDZGZLVHRGOGQ2TDVodEJWNE0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+      {{- with $tls }}
+      caBundle: {{ index $tls "ca.crt" }}
+      {{- end }}
     rules:
       - apiGroups: [""]
         resources:
@@ -29,4 +35,3 @@ webhooks:
         operations:
           - CREATE
           - UPDATE
-   

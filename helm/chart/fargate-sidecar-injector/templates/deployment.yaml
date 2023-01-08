@@ -49,6 +49,11 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             {{- toYaml .Values.env | nindent 10 }}
+          volumeMounts:
+          {{- range .Values.mounts }}
+          - name: {{ .name }}
+            mountPath: {{ .mountPath }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
