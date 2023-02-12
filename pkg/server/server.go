@@ -3,6 +3,7 @@ package server
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,8 +18,8 @@ func init() {
 	config = shared.NewConfig()
 }
 
-// Start starts webhook http server
-func Start() {
+// Listen starts webhook http server
+func StartListening() {
 	addr := strings.Join([]string{config.Host, fmt.Sprint(config.Port)}, ":")
 
 	mux := http.NewServeMux()
@@ -40,8 +41,10 @@ func Start() {
 	}
 }
 
-// serveTLS starts an HTTP server with TLS support using the provided address and handler.
+// serveTLS starts an HTTP server for the Mutating WebHook
 func serveTLS(addr string, webhookMux *http.ServeMux) {
+	var certPool = x509.NewCertPool()
+	certPool.AppendCertsFromPEM([]byte(config.TLSConfig.CA))
 	certs, err := tls.X509KeyPair([]byte(config.TLSConfig.Cert), []byte(config.TLSConfig.Key))
 	if err != nil {
 		panic(fmt.Errorf("error loading TLS certificate and key: %w", err))
@@ -51,6 +54,8 @@ func serveTLS(addr string, webhookMux *http.ServeMux) {
 		Certificates: []tls.Certificate{
 			certs,
 		},
+		RootCAs:            certPool,
+		InsecureSkipVerify: false, // TODO: InsecureSkipVerify - not ideal, find a better way.
 	}
 
 	listener, err := tls.Listen("tcp", addr, tlsConfig)

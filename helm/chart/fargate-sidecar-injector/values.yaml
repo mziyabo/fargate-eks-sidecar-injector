@@ -4,9 +4,12 @@
 
 replicaCount: 1
 
+namespace: default
+
 image:
-  repository: fargate-sidecar-injector-webhook
-  pullPolicy: Always
+  repository: docker.io/library/fargate-sidecar-injector-webhook
+  # Set to IfNotPresent for local development
+  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "test"
 
@@ -40,7 +43,6 @@ service:
   type: ClusterIP
   port: 8443
 
-
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -68,12 +70,13 @@ affinity: {}
 
 env: []
 
-# TODO: ConfigMap is hardcoded here - risky
-# This is to mount config into the Mutating WebHook Pods
-volumes:
-- name: config
-  configMap:
-    name: fargate-sidecar-injector
-mounts:
- - name: "config"
-   mountPath: "/etc/fargatesidecarinjector/"
+# webhookTLS specifies TLS cert/key for the webhook
+webhookTLS:
+  caCert:
+  cert:
+  key:
+
+# Cluster contains configurations specific to the kubernetes cluster
+cluster:
+  # Cluster DNS domain (required for requesting TLS certificates)
+  dnsDomain: cluster.local

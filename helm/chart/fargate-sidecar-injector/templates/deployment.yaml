@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fargate-sidecar-injector.fullname" . }}
+  name: {{ include "fargate-sidecar-injector.name" . }}
   labels:
     {{- include "fargate-sidecar-injector.labels" . | nindent 4 }}
 spec:
@@ -35,33 +35,31 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.port }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.port }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            {{- toYaml .Values.env | nindent 10 }}
+            {{- toYaml .Values.env | nindent 12 }}
           volumeMounts:
-          {{- range .Values.mounts }}
-          - name: {{ .name }}
-            mountPath: {{ .mountPath }}
-          {{- end }}
+          - name: "config"
+            mountPath: "/etc/fargatesidecarinjector/"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.volumes }}
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      - name: config
+        configMap:
+          name: {{ include "fargate-sidecar-injector.name" . }}
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}

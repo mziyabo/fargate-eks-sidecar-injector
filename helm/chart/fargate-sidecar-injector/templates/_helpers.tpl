@@ -24,6 +24,25 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Generate certificates for webhook
+*/}}
+{{- define "fargate-sidecar-injector.webhookCerts" -}}
+{{- $serviceName := (include "fargate-sidecar-injector.name" .) -}}
+{{- if (and .Values.webhookTLS.caCert .Values.webhookTLS.cert .Values.webhookTLS.key) -}}
+caCert: {{ .Values.webhookTLS.caCert | b64enc }}
+clientCert: {{ .Values.webhookTLS.cert | b64enc }}
+clientKey: {{ .Values.webhookTLS.key | b64enc }}
+{{- else -}}
+{{- $altNames := list (printf "%s.%s" $serviceName .Release.Namespace) (printf "%s.%s.svc" $serviceName .Release.Namespace) (printf "%s.%s.svc.%s" $serviceName .Release.Namespace .Values.cluster.dnsDomain) -}}
+{{- $ca := genCA "fargate-sidecar-injector-ca" 3650 -}}
+{{- $cert := genSignedCert (include "fargate-sidecar-injector.name" .) nil $altNames 3650 $ca -}}
+caCert: {{ $ca.Cert | b64enc }}
+clientCert: {{ $cert.Cert | b64enc }}
+clientKey: {{ $cert.Key | b64enc }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "fargate-sidecar-injector.chart" -}}
@@ -55,27 +74,8 @@ Create the name of the service account to use
 */}}
 {{- define "fargate-sidecar-injector.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "fargate-sidecar-injector.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "fargate-sidecar-injector.name" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create Certificate
-*/}}
-{{- define "fargate-sidecar-injector.cert" -}}
-{{- $tls := dict -}}
-{{ $currTls := lookup "v1" "ConfigMap" "default" (include "fargate-sidecar-injector.fullname" .) }}
-{{- if and $currTls $currTls.data }}
-{{- $_ := set $tls "ca.crt" (index $currTls.data "ca.crt") }}
-{{- $_ := set $tls "prv.key" (index $currTls.data "prv.key") }}
-{{- $_ := set $tls "cert.crt" (index $currTls.data "cert.crt") }}
-{{- else }}
-{{ $ca := genCA "fargate-sidecar-injector" 365 }}
-{{ $cert := genSignedCert "fargate-sidecar-injector.default.svc" (list "127.0.0.1") (list "fargate-sidecar-injector" "fargate-sidecar-injector.default" "fargate-sidecar-injector.default.svc") 365 $ca }}
-{{- $_ := set $tls "ca.crt" ($ca.Cert) }}
-{{- $_ := set $tls "prv.key" ($cert.Key) }}
-{{- $_ := set $tls "cert.crt" ($cert.Cert) }}
 {{- end }}
 {{- end }}

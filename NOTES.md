@@ -166,13 +166,77 @@ docker build . -t fargate-sidecar-injector-webhook:test && minikube image load f
 # build and push to minikube
 `docker build . -t fargate-sidecar-injector-webhook:test && minikube image load fargate-sidecar-injector-webhook:test`
 
+helm install helm/chart/fargate-sidecar-injector --generate-name --values helm/chart/fargate-sidecar-injector/values.yaml
+
 # running it locally for test
 
 ``` sh
 
 docker run  -v /Users/nash.singwango/source/repos/mziyabo/fargate-sidecar-injector:/etc/fargatesidecarinjector/ -it fargate-sidecar-injector-webhook:test
 
-docker run  -v /Users/nash.singwango/source/repos/mziyabo/fargate-sidecar-injector:/etc/fargatesidecarinjector/ -p 8443:8443 -it fargate-sidecar-injector-webhook:test
+docker run  -v /Users/nash.singwango/source/repos/mziyabo/fargate-sidecar-injector/examples:/etc/fargatesidecarinjector/ -p 8443:8443 -it fargate-sidecar-injector-webhook:test
 
 ```
 
+
+---
+
+Labels:               app.kubernetes.io/name=argocd-redis
+                      eks.amazonaws.com/fargate-profile=fp-argocd
+
+----
+minikube gotcha
+https://stackoverflow.com/questions/49639280/kubernetes-cannot-pull-image-from-private-docker-image-repository
+
+
+----- 
+revist this later
+how we were setting the cert before on configmap
+
+{{- $tls := dict -}}
+{{ $currTls := lookup "v1" "ConfigMap" .Release.Namespace (include "fargate-sidecar-injector.name" .) }} 
+
+{{- if and $currTls $currTls.data }}
+{{- $_ := set $tls "ca.crt" (index $currTls.data "ca.crt") }}
+{{- $_ := set $tls "prv.key" (index $currTls.data "prv.key") }}
+{{- $_ := set $tls "cert.crt" (index $currTls.data "cert.crt") }}
+{{- else }}
+{{ $ca := genCA "fargate-sidecar-injector" 365 }}
+{{ $cert := genSignedCert "fargate-sidecar-injector.default.svc" (list "127.0.0.1") (list "fargate-sidecar-injector" "fargate-sidecar-injector.default" "fargate-sidecar-injector.default.svc") 365 $ca }}
+{{- $_ := set $tls "ca.crt" ($ca.Cert) }}
+{{- $_ := set $tls "prv.key" ($cert.Key) }}
+{{- $_ := set $tls "cert.crt" ($cert.Cert) }}
+{{- end }}
+
+---
+
+on the lookup we had to use this:
+godsend**
+https://stackoverflow.com/questions/69101340/lookup-configmap-value-in-helm-template
+
+---
+
+eventually I ditched this tha twas so promising:
+
+{{- $tls := dict -}}
+{{- $configmap := (lookup "v1" "ConfigMap" .Release.Namespace "fargate-sidecar-injector") }}
+{{- if $configmap }}
+{{ $settings := get $configmap.data "fargatesidecarinjector.conf"}}
+{{- range (split "\n" $settings) }}
+{{- if ( contains "ca:" . ) }}
+{{- $_ := set $tls "ca.crt" ((split ":" .)._1 | trim | quote) }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+---------
+
+Invaluable JSON Patch tools:
+
+https://json-patch-builder-online.github.io/
+https://jsonpatch.me/
+
+
+DOWNWARD API
+- https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/#capabilities-of-the-downward-api
+- 

@@ -1,16 +1,29 @@
-{{- $tls := dict -}}
-{{ $cert := lookup "v1" "ConfigMap" "default" (include "fargate-sidecar-injector.fullname" .) }}
-{{- if and $cert $cert.data }}
-{{- $_ := set $tls "ca.crt" (index $cert.data "ca.crt") }}
-{{- end }}
+{{ $tls := fromYaml ( include "fargate-sidecar-injector.webhookCerts" . ) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fargate-sidecar-injector.name" . }}
+  labels:
+    {{- include "fargate-sidecar-injector.labels" . | nindent 4 }}
+data:
+  fargatesidecarinjector.conf: |-
+    serve:
+        port: 8443
+        host: ""
+        tls:
+          enabled: true
+          cert: {{  $tls.clientCert }}
+          certKey: {{ $tls.clientKey }}
+          ca: {{ $tls.caCert }}
+---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: {{ include "fargate-sidecar-injector.fullname" . }}
+  name: {{ include "fargate-sidecar-injector.name" . }}
   annotations:
     "helm.sh/hook": post-install
-    "helm.sh/hook-weight": "-5"
-    cert-manager.io/inject-ca-from: default/client
+    "helm.sh/hook-weight": -5"
   labels:
     {{- include "fargate-sidecar-injector.labels" . | nindent 4 }}
 webhooks:
@@ -20,12 +33,10 @@ webhooks:
     admissionReviewVersions: ["v1","v1beta1"]
     clientConfig:
       service:
-        namespace: default
-        name: {{ include "fargate-sidecar-injector.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        name: {{ include "fargate-sidecar-injector.name" . }}
         path: /mutate
-      {{- with $tls }}
-      caBundle: {{ index $tls "ca.crt" }}
-      {{- end }}
+      caBundle: {{ $tls.caCert }}
     rules:
       - apiGroups: [""]
         resources:
