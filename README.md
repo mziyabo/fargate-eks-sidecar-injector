@@ -1,4 +1,4 @@
-# eks-fargate-sidecar-injector
+# fargate-eks-sidecar-injector
 :warning: WIP
 
 Kubernetes mutating webhook for conditionally injecting sidecars into AWS Fargate pods.
@@ -6,7 +6,7 @@ Kubernetes mutating webhook for conditionally injecting sidecars into AWS Fargat
 
 ## Install
 ```bash
-IMAGE_NAME="eks-fargate-sidecar-injector-webhook"
+IMAGE_NAME="fargate-eks-sidecar-injector"
 TAG="latest"
 
 docker build . -t $IMAGE_NAME:$TAG
