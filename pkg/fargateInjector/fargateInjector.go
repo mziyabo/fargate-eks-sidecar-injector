@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	yamlUtil "github.com/ghodss/yaml"
-	"github.com/mziyabo/fargate-sidecar-injector/m/v2/pkg/shared"
+	"github.com/mziyabo/eks-fargate-sidecar-injector/m/v2/pkg/shared"
 	"github.com/tidwall/gjson"
 	v1beta1 "k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -88,7 +88,6 @@ func injectSidecarContainer(pod *corev1.Pod) []byte {
 	return pt
 }
 
-// 
 func injectContainers(configMap string) []patchOperation {
 	path := "containers"
 	patches := []patchOperation{}
@@ -109,7 +108,6 @@ func injectContainers(configMap string) []patchOperation {
 	return patches
 }
 
-//
 func injectVolumes(configMap string) []patchOperation {
 	path := "volumes"
 	patches := []patchOperation{}

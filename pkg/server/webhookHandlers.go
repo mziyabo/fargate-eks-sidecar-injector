@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	injector "github.com/mziyabo/fargate-sidecar-injector/m/v2/pkg/fargateInjector"
+	injector "github.com/mziyabo/eks-fargate-sidecar-injector/m/v2/pkg/fargateInjector"
 	"k8s.io/api/admission/v1beta1"
 )
 
@@ -27,7 +27,7 @@ func mutatingWebhookHandler(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	response, err := injector.Mutate(ar)
 	if err != nil {
 		log.Println(err)
