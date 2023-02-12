@@ -1,9 +1,17 @@
 # eks-fargate-sidecar-injector
+:warning: WIP
+
 Kubernetes mutating webhook for conditionally injecting sidecars into AWS Fargate pods.
+
 
 ## Install
 ```bash
-helm install helm/chart/fargate-sidecar-injector  --values helm/chart/fargate-sidecar-injector/values.yaml --generate-name
+IMAGE_NAME="eks-fargate-sidecar-injector-webhook"
+TAG="latest"
+
+docker build . -t $IMAGE_NAME:$TAG
+
+helm install helm/chart/fargate-sidecar-injector  --values helm/chart/fargate-sidecar-injector/values.yaml --generate-name --set image.repository=${IMAGE_NAME} --set image.tag=${TAG}
 ```
 
 
@@ -43,4 +51,4 @@ WIP, Contributions Welcome
 [Apache License, Version 2.0](./LICENSE)
 
 ## Known Issues
-
+- `helm uninstall` does not delete the MutatingWebhookConfiguration resource since it's deployed via a helm post-install-hook. This means you have to delete it separately from the helm release - [see here](https://helm.sh/docs/topics/charts_hooks/#hook-resources-are-not-managed-with-corresponding-releases)
