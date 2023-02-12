@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	yamlUtil "github.com/ghodss/yaml"
-	"github.com/mziyabo/eks-fargate-sidecar-injector/m/v2/pkg/shared"
+	"github.com/mziyabo/fargate-eks-sidecar-injector/m/v2/pkg/shared"
 	"github.com/tidwall/gjson"
 	v1beta1 "k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"

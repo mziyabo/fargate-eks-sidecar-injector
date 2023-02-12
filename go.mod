@@ -1,4 +1,4 @@
-module github.com/mziyabo/eks-fargate-sidecar-injector/m/v2
+module github.com/mziyabo/fargate-eks-sidecar-injector/m/v2
 
 go 1.19
 

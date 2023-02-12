@@ -17,7 +17,7 @@
 package main
 
 import (
-	"github.com/mziyabo/eks-fargate-sidecar-injector/m/v2/pkg/server"
+	"github.com/mziyabo/fargate-eks-sidecar-injector/m/v2/pkg/server"
 )
 
 func main() {

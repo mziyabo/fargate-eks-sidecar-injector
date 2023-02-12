@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mziyabo/eks-fargate-sidecar-injector/m/v2/pkg/shared"
+	"github.com/mziyabo/fargate-eks-sidecar-injector/m/v2/pkg/shared"
 )
 
 var config shared.FargateSidecarInjectorConfig

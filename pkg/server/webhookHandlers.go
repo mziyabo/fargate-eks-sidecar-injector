@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	injector "github.com/mziyabo/eks-fargate-sidecar-injector/m/v2/pkg/fargateInjector"
+	injector "github.com/mziyabo/fargate-eks-sidecar-injector/m/v2/pkg/fargateInjector"
 	"k8s.io/api/admission/v1beta1"
 )
 
