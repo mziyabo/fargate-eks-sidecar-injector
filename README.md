@@ -51,4 +51,3 @@ WIP, Contributions Welcome
 [Apache License, Version 2.0](./LICENSE)
 
 ## Known Issues
-- `helm uninstall` does not delete the MutatingWebhookConfiguration resource since it's deployed via a helm post-install-hook. This means you have to delete it separately from the helm release - [see here](https://helm.sh/docs/topics/charts_hooks/#hook-resources-are-not-managed-with-corresponding-releases)
