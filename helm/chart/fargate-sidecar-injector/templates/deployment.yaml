@@ -48,7 +48,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            {{- toYaml .Values.env | nindent 12 }}
+          - name: WEBHOOK_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           volumeMounts:
           - name: "config"
             mountPath: "/etc/fargatesidecarinjector/"

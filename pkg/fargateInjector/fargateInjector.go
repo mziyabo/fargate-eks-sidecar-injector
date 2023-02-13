@@ -3,6 +3,8 @@ package fargateInjector
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 
 	yamlUtil "github.com/ghodss/yaml"
 	"github.com/mziyabo/fargate-eks-sidecar-injector/m/v2/pkg/shared"
@@ -59,28 +61,29 @@ func Mutate(ar v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 	}, nil
 }
 
-// injectSidecarContainer creates a patch that adds sidecar containers to the podspec
+// injectSidecarContainer creates an AdmissionResponse patch to adds sidecar containers
 func injectSidecarContainer(pod *corev1.Pod) []byte {
 	patches := []patchOperation{}
-	// TODO: use down-api for webhook data like namespaces and configmaps
-	configMapData := k8sUtil.GetConfigMap("default", "fargate-injector-sidecar-config")
 
 	fargateProfile := pod.Labels["eks.amazonaws.com/fargate-profile"]
 	if fargateProfile != "" {
-		// NOTE: Filter by fargateProfile for now in future it could be using annotations etc.
-		containerPatches := injectContainers(configMapData[fargateProfile])
-		volumePatches := injectVolumes(configMapData[fargateProfile])
+		// use Kubernetes down-api for webhook data like namespaces
+		configMapData := k8sUtil.GetConfigMap(os.Getenv("WEBHOOK_NAMESPACE"), "fargate-injector-sidecar-config")
 
-		// TODO: cleanup this code.. yikes
-		f := len(containerPatches) + len(volumePatches)
-		var _patches []patchOperation = make([]patchOperation, f)
+		if configMapData != nil {
+			// NOTE: Filter by fargateProfile for now in future it could be using annotations etc.
+			containerPatches := injectContainers(configMapData[fargateProfile])
+			volumePatches := injectVolumes(configMapData[fargateProfile])
 
-		copy(_patches[:], containerPatches[:])
-		copy(_patches[len(containerPatches):], volumePatches[:])
+			// TODO: cleanup this code
+			size := len(containerPatches) + len(volumePatches)
+			var _patches []patchOperation = make([]patchOperation, size)
+			copy(_patches[:], containerPatches[:])
+			copy(_patches[len(containerPatches):], volumePatches[:])
 
-		patches = _patches
+			patches = _patches
+		}
 	}
-
 	pt, err := json.Marshal(patches)
 	if err != nil {
 		panic(err)
@@ -132,7 +135,7 @@ func injectVolumes(configMap string) []patchOperation {
 func getPatch(configmapData string, path string) string {
 	p, err := yamlUtil.YAMLToJSON([]byte(configmapData))
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	return gjson.Get(string(p), fmt.Sprintf("spec.%s", path)).String()

@@ -10,7 +10,6 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-//
 type K8sUtil struct{}
 
 var (
@@ -29,11 +28,17 @@ func init() {
 	}
 }
 
-// GetConfigMap returns ConfigMap data
+// GetConfigMap returns ConfigMap Data
 func (k K8sUtil) GetConfigMap(namespace, configMapName string) map[string]string {
 	configMap, err := client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMapName, metav1.GetOptions{})
 	if err != nil {
-		log.Fatalln(err)
+		log.Printf("error fetching ConfigMap [%s] in Namespace [%s] %s", configMapName, namespace, err)
+		return nil
+	}
+
+	if configMap == nil {
+		log.Printf("Not Found: ConfigMap [%s] in Namespace [%s]", configMapName, namespace)
+		return nil
 	}
 
 	return configMap.Data

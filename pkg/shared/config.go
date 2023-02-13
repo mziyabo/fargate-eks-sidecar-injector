@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 
 	"encoding/base64"
@@ -15,10 +16,9 @@ func init() {
 
 // Initialize webhook config
 func NewConfig() FargateSidecarInjectorConfig {
-	// TODO: Clean this up
-	cert, _ := base64.StdEncoding.DecodeString(viper.GetString("serve.tls.cert"))
-	key, _ := base64.StdEncoding.DecodeString(viper.GetString("serve.tls.certKey"))
-	ca, _ := base64.StdEncoding.DecodeString(viper.GetString("serve.tls.ca"))
+	ca := viperGetB64("serve.tls.ca")
+	cert := viperGetB64("serve.tls.cert")
+	key := viperGetB64("serve.tls.certKey")
 
 	config := FargateSidecarInjectorConfig{
 		Port: viper.GetInt("serve.port"),
@@ -64,6 +64,15 @@ func parseConfig() {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
+		log.Fatalln(fmt.Errorf("fatal error config file: %w", err))
 	}
+}
+
+// viperGetB64 base64 decodes and returns config setting
+func viperGetB64(setting string) []byte {
+	d, err := base64.StdEncoding.DecodeString(viper.GetString(setting))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return d
 }
