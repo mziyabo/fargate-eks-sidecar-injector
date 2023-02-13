@@ -21,7 +21,6 @@ func init() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	client, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalln(err)
@@ -35,11 +34,9 @@ func (k K8sUtil) GetConfigMap(namespace, configMapName string) map[string]string
 		log.Printf("error fetching ConfigMap [%s] in Namespace [%s] %s", configMapName, namespace, err)
 		return nil
 	}
-
 	if configMap == nil {
 		log.Printf("Not Found: ConfigMap [%s] in Namespace [%s]", configMapName, namespace)
 		return nil
 	}
-
 	return configMap.Data
 }
