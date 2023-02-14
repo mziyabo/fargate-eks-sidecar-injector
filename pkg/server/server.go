@@ -37,7 +37,7 @@ func StartListening() {
 
 	if listenErr != nil {
 		_ = fmt.Errorf("failed to listen on address: [%s]", addr)
-		log.Panic(listenErr)
+		log.Fatalln(listenErr)
 	}
 }
 
@@ -47,7 +47,7 @@ func serveTLS(addr string, webhookMux *http.ServeMux) {
 	certPool.AppendCertsFromPEM([]byte(config.TLSConfig.CA))
 	certs, err := tls.X509KeyPair([]byte(config.TLSConfig.Cert), []byte(config.TLSConfig.Key))
 	if err != nil {
-		panic(fmt.Errorf("error loading TLS certificate and key: %w", err))
+		log.Fatalln(fmt.Errorf("error loading TLS certificate and key: %w", err))
 	}
 
 	tlsConfig := &tls.Config{
@@ -60,7 +60,7 @@ func serveTLS(addr string, webhookMux *http.ServeMux) {
 
 	listener, err := tls.Listen("tcp", addr, tlsConfig)
 	if err != nil {
-		panic(fmt.Errorf("listener error: %w", err))
+		log.Fatalln(fmt.Errorf("listener error: %w", err))
 	}
 	defer listener.Close()
 

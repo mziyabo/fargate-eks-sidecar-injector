@@ -31,7 +31,7 @@ func Mutate(ar v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 	var pod *corev1.Pod
 
 	if err := json.Unmarshal(req.Object.Raw, &pod); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	var patchType v1beta1.PatchType = "JSONPatch"
@@ -86,7 +86,7 @@ func injectSidecarContainer(pod *corev1.Pod) []byte {
 	}
 	pt, err := json.Marshal(patches)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	return pt
 }

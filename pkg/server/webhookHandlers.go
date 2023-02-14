@@ -25,7 +25,7 @@ func mutatingWebhookHandler(rw http.ResponseWriter, req *http.Request) {
 	ar := v1beta1.AdmissionReview{}
 	err = json.Unmarshal(body, &ar)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	response, err := injector.Mutate(ar)
@@ -38,7 +38,7 @@ func mutatingWebhookHandler(rw http.ResponseWriter, req *http.Request) {
 	ar.Response = response
 	responseBody, err := json.Marshal(ar)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
