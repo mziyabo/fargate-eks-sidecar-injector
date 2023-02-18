@@ -1,5 +1,6 @@
 # fargate-eks-sidecar-injector
-[![Publish Docker image](https://github.com/mziyabo/fargate-eks-sidecar-injector/actions/workflows/docker.yaml/badge.svg)](https://github.com/mziyabo/fargate-eks-sidecar-injector/actions/workflows/docker.yaml)
+
+[![Build](https://github.com/mziyabo/fargate-eks-sidecar-injector/actions/workflows/build.yaml/badge.svg)](https://github.com/mziyabo/fargate-eks-sidecar-injector/actions/workflows/build.yaml)
 
 Kubernetes mutating webhook for injecting sidecars into AWS Fargate pods.
 
