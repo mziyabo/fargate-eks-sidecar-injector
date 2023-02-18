@@ -55,7 +55,7 @@ func serveTLS(addr string, webhookMux *http.ServeMux) {
 			certs,
 		},
 		RootCAs:            certPool,
-		InsecureSkipVerify: false, // TODO: InsecureSkipVerify - not ideal, find a better way.
+		// InsecureSkipVerify: false, // TODO: InsecureSkipVerify - not ideal, find a better way.
 	}
 
 	listener, err := tls.Listen("tcp", addr, tlsConfig)

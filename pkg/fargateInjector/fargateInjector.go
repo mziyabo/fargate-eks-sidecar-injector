@@ -67,15 +67,14 @@ func injectSidecarContainer(pod *corev1.Pod) []byte {
 
 	fargateProfile := pod.Labels["eks.amazonaws.com/fargate-profile"]
 	if fargateProfile != "" {
-		// use Kubernetes down-api for webhook data like namespaces
 		configMapData := k8sUtil.GetConfigMap(os.Getenv("WEBHOOK_NAMESPACE"), "fargate-injector-sidecar-config")
-
 		if configMapData != nil {
+			log.Printf("Started sidecar-injection on pod %s - Fargate-profile: %s", pod.Name, fargateProfile)
 			// NOTE: Filter by fargateProfile for now in future it could be using annotations etc.
 			containerPatches := injectContainers(configMapData[fargateProfile])
 			volumePatches := injectVolumes(configMapData[fargateProfile])
 
-			// TODO: cleanup this code
+			// Combine container and volume patches
 			size := len(containerPatches) + len(volumePatches)
 			var _patches []patchOperation = make([]patchOperation, size)
 			copy(_patches[:], containerPatches[:])
@@ -83,6 +82,7 @@ func injectSidecarContainer(pod *corev1.Pod) []byte {
 
 			patches = _patches
 		}
+		log.Printf("Done sidecar-injection on pod %s - Fargate-profile: %s. PatchCount: %d", pod.Name, fargateProfile, len(patches))
 	}
 	pt, err := json.Marshal(patches)
 	if err != nil {

@@ -1,0 +1,30 @@
+# Example: fargate-injector-sidecar-config
+#
+# This config injects sidecar containers and volumes as specified in ConfigMap data:
+# Sidecar injection occurs on pods in the `fp-default` FargateProfile and other fargate-profiles maybe added-
+# NOTE: currently no global sidecar-injection feature across fargate profiles
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fargate-injector-sidecar-config
+data: 
+  fp-default: |- #<- Fargate Profile
+    spec:
+      volumes:
+      - name: log
+        emptyDir: {}
+      containers:
+      - image: busybox
+        name: side-man
+        args:
+        - /bin/sh
+        - -c
+        - >
+          while true; do
+            echo "$(date) INFO hello from main-container" >> /var/log/myapp.log ;
+            sleep 1;
+          done
+        volumeMounts:
+        - name: log
+          mountPath: /var/log

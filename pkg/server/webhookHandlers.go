@@ -12,7 +12,7 @@ import (
 	"k8s.io/api/admission/v1beta1"
 )
 
-// HTTP handler for server
+// HTTP handler for Mutate
 func mutatingWebhookHandler(rw http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	defer req.Body.Close()
