@@ -1,7 +1,7 @@
 # fargate-eks-sidecar-injector
 Kubernetes mutating webhook for injecting sidecars into AWS Fargate pods.
 
-Works by checking fargate pod annotation `eks.amazonaws.com/fargate-profile` and then injecting sidecars from a `fargate-injector-sidecar-config` ConfigMap.
+Works by inspecting the fargate pod annotation `eks.amazonaws.com/fargate-profile` and injecting sidecars from a `fargate-injector-sidecar-config` ConfigMap.
 
 ## Install
 To build and run the webhook from source:
