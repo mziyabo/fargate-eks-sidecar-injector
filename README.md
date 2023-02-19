@@ -8,6 +8,14 @@ Kubernetes mutating webhook for injecting sidecars into AWS Fargate pods.
 Works by inspecting the fargate pod annotation `eks.amazonaws.com/fargate-profile` and injecting sidecars from a `fargate-injector-sidecar-config` ConfigMap.
 
 ## Install
+
+Helm install from repository:
+
+```
+helm repo add mziyabo https://mziyabo.github.io/helm-charts
+helm install fargate-sidecar-injector mziyabo/fargate-sidecar-injector 
+```
+
 To build and run the webhook from source:
 
 ```bash
@@ -22,6 +30,8 @@ helm install helm/chart/fargate-sidecar-injector  \
     --set image.repository=${IMAGE_NAME} \
     --set image.tag=${TAG}
 ```
+
+> Uninstall uses the `helm uninstall` command, however you will have to run `kubectl delete mutatingwebhookconfiguration fargate-sidecar-injector` after since the MutatingWebhookConfiguration is installed as a helm post-install hook. Helm docs explain [the limitation](https://helm.sh/docs/topics/charts_hooks/#hook-resources-are-not-managed-with-corresponding-releases).
 
 This webhook needs to run after `0500-amazon-eks-fargate-mutation.amazonaws.com` therefore if you specify `.Values.nameOverride` make sure to use a name lexicographically greater than the amazon webhook.
 ## Usage
